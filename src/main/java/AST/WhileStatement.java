@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class WhileStatement {
-    private Condition condition;
-    private List<Statement> body;
+    private final Condition condition;
+    private final List<Statement> body;
 
     public WhileStatement(Condition condition, List<Statement> body) {
         this.condition = condition;
@@ -33,6 +33,7 @@ public class WhileStatement {
     public int hashCode() {
         return Objects.hash(condition, body);
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

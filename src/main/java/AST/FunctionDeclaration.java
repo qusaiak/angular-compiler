@@ -46,6 +46,7 @@ public class FunctionDeclaration {
     public void setFunctionBody(FunctionBody functionBody) {
         this.functionBody = functionBody;
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

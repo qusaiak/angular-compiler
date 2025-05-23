@@ -10,22 +10,6 @@ public class Type {
         this.typeName = typeName;
     }
 
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    @Override
-    public String toString() {
-        return "Type: {\n" +
-                "  typeName='" + typeName + "'\n" +
-                "}";
-    }
-
-
     public static List<Type> getAllTypes() {
         List<Type> types = new ArrayList<>();
         types.add(new Type("ID"));
@@ -40,6 +24,21 @@ public class Type {
         types.add(new Type("NUMBER"));
         types.add(new Type("NULL"));
         return types;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    @Override
+    public String toString() {
+        return "Type: {\n" +
+                "  typeName='" + typeName + "'\n" +
+                "}";
     }
 
 }

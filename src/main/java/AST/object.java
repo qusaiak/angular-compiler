@@ -17,6 +17,7 @@ public class object {
     public void addProperty(String key, Object value) {
         properties.put(key, value);
     }
+
     @Override
     public String toString() {
         return "CustomObject: {\n" +

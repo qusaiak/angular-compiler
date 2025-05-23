@@ -5,5 +5,5 @@ public enum Directive {
     NGSWITCH,
     NGFOR,
     NGSTYLE,
-    NGCLASS;
+    NGCLASS
 }

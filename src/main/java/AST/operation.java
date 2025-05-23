@@ -10,5 +10,5 @@ public enum operation {
     GREATERTHAN,
     GREATEREQUAL,
     LESSTHAN,
-    LESSEQUAL;
+    LESSEQUAL
 }

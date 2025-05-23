@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class CallFunction {
-    private String functionName;
-    private List<Expression> arguments;
+    private final String functionName;
+    private final List<Expression> arguments;
 
     public CallFunction(String functionName, List<Expression> arguments) {
         this.functionName = functionName;

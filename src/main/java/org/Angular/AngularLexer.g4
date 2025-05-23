@@ -41,11 +41,11 @@ DOUBLERIGHTCURLY  : '}}';
 
 // Keywords
 COMPONENT         : 'component';
-SELECTOR :'selector';
-TEMPLATE :'template';
-TEMPLATEURL :'templateUrl';
-STYLES :'styles';
-STYLEURL :'styleUrl';
+SELECTOR          :'selector';
+TEMPLATE          :'template';
+TEMPLATEURL       :'templateUrl';
+STYLES            :'styles';
+STYLEURL          :'styleUrl';
 CLASS             : 'class';
 INPUT             : 'input';
 OUTPUT            : 'output';

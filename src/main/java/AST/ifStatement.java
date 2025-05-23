@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class ifStatement {
-    private Condition condition;
-    private List<Statement> thenStatements;
-    private List<Statement> elseStatements;
+    private final Condition condition;
+    private final List<Statement> thenStatements;
+    private final List<Statement> elseStatements;
 
     public ifStatement(Condition condition, List<Statement> thenStatements, List<Statement> elseStatements) {
         this.condition = condition;
@@ -40,6 +40,7 @@ public class ifStatement {
     public int hashCode() {
         return Objects.hash(condition, thenStatements, elseStatements);
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

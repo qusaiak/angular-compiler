@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class ForStatement {
-    private VariableDeclaration variableDeclaration;
-    private Condition condition;
-    private Statement body;
+    private final VariableDeclaration variableDeclaration;
+    private final Condition condition;
+    private final Statement body;
 
     public ForStatement(VariableDeclaration variableDeclaration, Condition condition, Statement body, List<Statement> statements) {
         this.variableDeclaration = variableDeclaration;
@@ -40,6 +40,7 @@ public class ForStatement {
     public int hashCode() {
         return Objects.hash(variableDeclaration, condition, body);
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -11,16 +11,16 @@ public class Expression {
     private AST.operation operation;
 
     public Expression(String text) {
-        this.id= text;
+        this.id = text;
     }
 
     public Expression(int i) {
     }
 
     public Expression(Expression left, Expression right, AST.operation op) {
-        this.left=left;
-        this.right= right;
-        this.operation=op;
+        this.left = left;
+        this.right = right;
+        this.operation = op;
     }
 
     public Value getValue() {

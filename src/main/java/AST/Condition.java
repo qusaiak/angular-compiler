@@ -3,9 +3,9 @@ package AST;
 import java.util.Objects;
 
 public class Condition {
-    private Expression left;
-    private Expression right;
-    private String operator;
+    private final Expression left;
+    private final Expression right;
+    private final String operator;
 
     public Condition(Expression left, Expression right, String operator) {
         this.left = left;

@@ -11,10 +11,10 @@ public class ClassDeclaration {
 
 
     public ClassDeclaration(String className, String extendsClassName, List<String> implementsList, List<ClassBody> classBody) {
-        this.className=className;
-        this.extendsClassName=extendsClassName;
-        this.implementsList= implementsList;
-        this.classBody= classBody;
+        this.className = className;
+        this.extendsClassName = extendsClassName;
+        this.implementsList = implementsList;
+        this.classBody = classBody;
     }
 
     public String getClassName() {
