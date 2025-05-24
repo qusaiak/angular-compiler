@@ -36,9 +36,7 @@ public class Type {
 
     @Override
     public String toString() {
-        return "Type: {\n" +
-                "  typeName='" + typeName + "'\n" +
-                "}";
+        return typeName;
     }
 
 }

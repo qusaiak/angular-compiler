@@ -21,9 +21,9 @@ public class Array {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Array: {\n");
+        sb.append("Array: {");
         if (values != null && !values.isEmpty()) {
-            sb.append("  values=").append(values).append('\n');
+            sb.append("values = ").append(values);
         }
         sb.append("}");
         return sb.toString();

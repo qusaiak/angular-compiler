@@ -16,7 +16,7 @@ exportStatement
 
 variableDeclaration
     : (VAR | LET | CONST)? ID (EQUAL | COLON) (value | array | object | functionDeclaration) (SEMI | COMMA)
-    | (VAR | LET | CONST)? ID COLON type value? EQUAL (value | array | object | functionDeclaration) (SEMI | COMMA)
+    | (VAR | LET | CONST)? ID COLON type (LEFTBRACKET RIGHTBRACKET)? value? EQUAL (value | array | object | functionDeclaration) (SEMI | COMMA)
     ;
 
 classDeclaration

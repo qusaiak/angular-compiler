@@ -166,14 +166,14 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             functionDeclaration = (FunctionDeclaration) visit(ctx.functionDeclaration());
         }
 
-        Row row = new Row();
-        row.setType(type.getTypeName());
-        row.setValue(value.toString());
-        row.setName(id);
-        this.symbolTable.addVariable(row.getName(),row);
 
 
         if (type != null && value != null) {
+            Row row = new Row();
+            row.setType(type.getTypeName());
+            row.setValue(value.toString());
+            row.setName(id);
+            this.symbolTable.addVariable(row.getName(),row);
             return new VariableDeclaration(varType, id, type, value);
         } else if (value != null) {
             return new VariableDeclaration(varType, id, value);
@@ -275,17 +275,17 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
     @Override
     public Object visitValue(AngularParser.ValueContext ctx) {
         if (ctx.type() != null) {
-            return new Value(visit(ctx.type()));
+            return new Value(String.valueOf(visit(ctx.type())));
         } else if (ctx.array() != null) {
-            return new Value(visit(ctx.array()));
+            return new Value(String.valueOf(visit(ctx.array())));
         } else if (ctx.object() != null) {
-            return new Value(visit(ctx.object()));
+            return new Value(String.valueOf(visit(ctx.object())));
         } else if (ctx.jsxElement() != null) {
-            return new Value(visit(ctx.jsxElement()));
+            return new Value(String.valueOf(visit(ctx.jsxElement())));
         } else if (ctx.angularDirective() != null) {
-            return new Value(visit(ctx.angularDirective()));
+            return new Value(String.valueOf(visit(ctx.angularDirective())));
         } else if (ctx.interpolation() != null) {
-            return new Value(visit(ctx.interpolation()));
+            return new Value(String.valueOf(visit(ctx.interpolation())));
         }
 
         return null;

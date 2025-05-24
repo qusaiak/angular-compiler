@@ -29,7 +29,7 @@ public class Value {
         this.booleanValue = booleanValue;
     }
 
-    public Value(Object nestedObject) {
+    public Value(object nestedObject) {
         this.nestedObject = nestedObject;
     }
 
@@ -60,9 +60,8 @@ public class Value {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Value: {");
         if (stringValue != null) {
-            sb.append("\n  stringValue='").append(stringValue).append('\'');
+            sb.append(stringValue).append('\'');
         } else if (intValue != null) {
             sb.append("\n  intValue=").append(intValue);
         } else if (doubleValue != null) {
@@ -80,7 +79,6 @@ public class Value {
         } else if (isNull) {
             sb.append("\n  isNull=").append(isNull);
         }
-        sb.append("\n}");
         return sb.toString();
     }
 
