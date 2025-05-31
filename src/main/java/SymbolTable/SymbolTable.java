@@ -5,14 +5,15 @@ import java.util.List;
 
 public class SymbolTable {
     private List<Row> rows = new ArrayList<>();
-    private int currentScopeId = 0;
+    private  int currentScopeId = 0;
     public List<Row> getRows() {
         return rows;
     }
     public int getScopeId() {
         return currentScopeId;
     }
-
+    public void setScopeId(int scopeId ) {
+        this.currentScopeId=scopeId   ; }
     public void enterScope() {
         currentScopeId++;
     }
@@ -92,9 +93,7 @@ public class SymbolTable {
 //        return currentScopeId;
 //    }
 //
-//    public void setScopeId(int scopeId) {
-//        this.currentScopeId = scopeId;
-//    }
+
 //
 //    public void enterScope() {
 //        currentScopeId++;

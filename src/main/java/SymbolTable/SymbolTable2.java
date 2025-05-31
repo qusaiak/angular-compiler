@@ -4,13 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable2 {
-    private Map<String, Row> symbolTable;
+    private final Map<String, Row> symbolTable;
     private int currentScopeId = 0;
 
     public SymbolTable2() {
         this.symbolTable = new HashMap<>();
     }
-
+    public void setScopeId( ) {
+        this.currentScopeId = this.currentScopeId+1;
+    }
     public int getScopeId() {
         return currentScopeId;
     }
@@ -24,7 +26,7 @@ public class SymbolTable2 {
         symbolTable.entrySet().removeIf(entry -> entry.getValue().getScopeId() > currentScopeId);
     }
 
-    public void addVariable(int line, String variableName, String type, String value) {
+    public void addVariable(int line, String variableName, String type, String value,int currentScopeId) {
         Row row = new Row(line, variableName, type, value, currentScopeId);
         symbolTable.put(variableName, row);
     }

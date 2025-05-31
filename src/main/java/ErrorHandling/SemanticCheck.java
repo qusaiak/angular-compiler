@@ -99,12 +99,12 @@ public class SemanticCheck {
         }
 
     }
-        public void checkIfVariableUsedNotDefined(String variableUsedName){
-            if (!this.declaredVariables.getOrDefault(variableUsedName, false)) {
-                Errors.add("Error: Variable '" + variableUsedName + "' is used but not defined.");
-            }
+    public void checkIfVariableUsedNotDefined(String variableUsedName){
+        if (!this.declaredVariables.getOrDefault(variableUsedName, false)) {
+            Errors.add("Error: Variable '" + variableUsedName + "' is used but not defined.");
         }
-//    public void checkIfVariableIsConst(String variableUsedName, int linqe) {
+    }
+    //    public void checkIfVariableIsConst(String variableUsedName, int linqe) {
 //        if (this.usedConstVariables.getOrDefault(variableUsedName, false)) {
 //            Errors.add("Line "+ line + ": (Error: You cannot assign a value to a constant variable: " + variableUsedName + ").");
 //        }

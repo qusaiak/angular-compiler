@@ -37,6 +37,9 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
     @Override
     public Object visitProgramSt(AngularParser.ProgramStContext ctx) {
+        symbolTable.enterScope();
+        symbolTable2.enterScope();
+
         List<ImportStatement> importStatements = new ArrayList<>();
         List<VariableDeclaration> variableDeclarations = new ArrayList<>();
         List<ClassDeclaration> classDeclarations = new ArrayList<>();
@@ -64,6 +67,11 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         }
         System.out.println("\n");
         System.out.println(symbolTable.toString());
+        symbolTable.exitScope();
+        symbolTable2.exitScope();
+
+
+
         return new Program(importStatements, variableDeclarations, classDeclarations, functionDeclarations, componentDeclarations, exportStatement);
     }
 
@@ -90,9 +98,10 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
                 "Import",
                 importStatement.getFrom(),
                 0);
-
+        symbolTable.setScopeId(row.getScopeId());
+        symbolTable2.setScopeId();
         symbolTable.addVariable(row);
-        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue(),row.getScopeId());
 
         return importStatement;
     }
@@ -172,9 +181,11 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
         Row row = new Row(ctx.getStart().getLine(), id, type != null ? type.getTypeName() : "unknown",
                 value != null ? value.toString() : "undefined", currentScopeId);
+        symbolTable.setScopeId(row.getScopeId());
+        symbolTable2.setScopeId();
 
         symbolTable.addVariable(row);
-        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue(), row.getScopeId());
 
         if (type != null) {
             return new VariableDeclaration(varType, id, type, value);
@@ -199,18 +210,17 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             }
         }
 
-        symbolTable.enterScope();
 
         if (ctx.classBody() != null) {
             classBodyList.add((ClassBody) visit(ctx.classBody()));
         }
 
         Row row = new Row(ctx.getStart().getLine(), className, "Class", "Defined", symbolTable.getScopeId());
-
+        symbolTable.setScopeId(row.getScopeId());
+        symbolTable2.setScopeId();
         symbolTable.addVariable(row);
-        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue(), row.getScopeId());
 
-        symbolTable.exitScope();
 
         return new ClassDeclaration(className, extendsClassName, implementsList, classBodyList);
     }
@@ -232,16 +242,16 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             returnType = (Type) visit(ctx.type());
         }
 
-        symbolTable.enterScope();
 
         FunctionBody functionBody = (FunctionBody) visit(ctx.functionBody());
 
         Row row = new Row(ctx.getStart().getLine(), id, "Function", "Defined", symbolTable.getScopeId());
+        symbolTable.setScopeId(row.getScopeId());
+        symbolTable2.setScopeId();
 
         symbolTable.addVariable(row);
-        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+        symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue(), row.getScopeId());
 
-        symbolTable.exitScope();
 
         return new FunctionDeclaration(id, parameters, returnType, functionBody);
     }
@@ -257,19 +267,25 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         if (ctx.getRuleContext(AngularParser.Decorator_SimpleContext.class, 0) != null) {
             decorator = (Decorator) visit(ctx.getRuleContext(AngularParser.Decorator_SimpleContext.class, 0));
 
-            symbolTable.enterScope();
 
             Row row = new Row(ctx.getStart().getLine(), decorator.getId(), "Decorator", "Defined", symbolTable.getScopeId());
+            symbolTable2.setScopeId();
+            symbolTable.setScopeId(row.getScopeId());
+
             symbolTable.addVariable(row);
-            symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+            symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue(), row.getScopeId());
+
         }
 
         if (ctx.getRuleContext(AngularParser.ComponentBodyStContext.class, 0) != null) {
             componentBody = (ComponentBody) visit(ctx.getRuleContext(AngularParser.ComponentBodyStContext.class, 0));
 
             Row row = new Row(ctx.getStart().getLine(), "ComponentBody", "Component", componentBody.getVariableDeclarations().toString(), symbolTable.getScopeId());
+            symbolTable.setScopeId(row.getScopeId());
+            symbolTable2.setScopeId();
+
             symbolTable.addVariable(row);
-            symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+            symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue(), row.getScopeId());
         }
 
         symbolTable.exitScope();
