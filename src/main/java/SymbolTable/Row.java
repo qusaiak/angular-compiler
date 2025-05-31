@@ -7,8 +7,6 @@ public class Row {
     private String value;
     private int scopeId;
 
-    public Row() {}
-
     public Row(int line, String variableName, String type, String value, int scopeId) {
         this.line = line;
         this.variableName = variableName;
