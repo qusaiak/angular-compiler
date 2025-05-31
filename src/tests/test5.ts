@@ -1,9 +1,10 @@
 // Variable declaration
-let x: number =44; // تعريف المتغير مرة واحدة
-let y: number=6; // التأكد من تعريف المتغير قبل استخدامه
-let z: boolean=true; // التأكد من تعريف المتغير قبل استخدامه
+let x: number =44;
+let y: number=6;
+let y: number=6;
+let z: boolean=true;
+let x: number =9;
 
+const anotherVar: string = "hello";
 
-const anotherVar: string = "hello"; // النص يجب أن يكون بين علامات اقتباس
-
-var arrayVar: number[] = [1, 2, 3]; // تعريف المصفوفة بشكل صحيح
+var arrayVar: number[] = [1, 2, 3];
