@@ -1,6 +1,7 @@
 package org.Angular;
 
 import AST.Program;
+import ErrorHandling.SemanticCheck;
 import Visitor.BaseVisitor;
 import SymbolTable.SymbolTable;
 import SymbolTable.SymbolTable2; // ✅ إضافة `SymbolTable2`
@@ -55,6 +56,9 @@ public class Main {
 
         System.out.println("\n******** SYMBOL TABLE 2 ********");
         System.out.println(symbolTable2.toString()); // ✅ إضافة طباعة `SymbolTable2`
+        SemanticCheck semanticCheck = new SemanticCheck();
+        semanticCheck.setSymbolTable(baseVisitor.getSymbolTable());
+        semanticCheck.check(program);
     }
 
     static void print_ast(ParseTree tree, int depth) {
