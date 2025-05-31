@@ -48,8 +48,9 @@ object : LEFTCURLY (ID COLON value (COMMA ID COLON value)*)? RIGHTCURLY # Object
 // Classes
 classBody : (decorator | constructorDeclaration | variableDeclaration | functionDeclaration)* # ClassBodySt;
 
-assignment : (ID COLON type SEMI)+ # Assignment_Type
+assignment : (ID COLON type SEMI)+ (EQUAL value)? # Assignment_Type
            | THIS DOT ID EQUAL (value | THIS DOT ID (DOT callFunction)?)? SEMI? # Assignment_Value
+           | ID EQUAL value SEMI             # Assignment_Value2
            ;
 
 // Decorators

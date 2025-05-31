@@ -54,30 +54,37 @@ public class SemanticCheck {
     public void checkIfVariableAlreadyDefined() {
         List<Row> variables = symbolTable.getRows();
         if (!variables.isEmpty()) {
-            int cur = 0;
+            int curScope = 0;
             checkScopes.push(new HashMap<>());
+
             for (Row row : variables) {
                 int scopeId = row.getScopeId();
                 String name = row.getVariableName();
-                while (cur < scopeId) {
-                    cur++;
+                String type = row.getType();
+                boolean isAssignment = row.getValue() != null; // ✅ التحقق مما إذا كان مجرد إسناد قيمة وليس تعريف جديد
+
+                while (curScope < scopeId) {
+                    curScope++;
                     checkScopes.push(new HashMap<>());
                 }
-                while (cur > scopeId) {
+                while (curScope > scopeId) {
                     checkScopes.pop();
-                    cur--;
+                    curScope--;
                 }
-                Map<String, Integer> top = checkScopes.isEmpty() ? new HashMap<>() : checkScopes.peek();
-                if (top.getOrDefault(name, 0) > 0) {
-                    // Error
+
+                Map<String, Integer> topScope = checkScopes.isEmpty() ? new HashMap<>() : checkScopes.peek();
+
+                // ✅ السماح بإعادة تعيين قيمة المتغير لكن منع إعادة تعريفه
+                if (topScope.containsKey(name) && !isAssignment) {
                     Errors.add("Error: Variable '" + name + "' is already defined in scope " + scopeId);
                     System.out.println("Error: Variable '" + name + "' is already defined in scope " + scopeId);
                 } else {
-                    top.put(name, top.getOrDefault(name, 0) + 1);
-                    checkScopes.push(top);
+                    topScope.put(name, topScope.getOrDefault(name, 0) + 1);
+                    checkScopes.push(topScope);
                 }
             }
         }
     }
+
 
 }

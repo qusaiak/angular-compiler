@@ -18,7 +18,7 @@ import static org.antlr.v4.runtime.CharStreams.fromFileName;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        int testNumber = 7;
+        int testNumber = 5;
         String source = "src/tests/test" + testNumber + ".ts";
         CharStream cs = fromFileName(source);
         AngularLexer lexer = new AngularLexer(cs);

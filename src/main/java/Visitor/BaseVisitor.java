@@ -173,7 +173,6 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             functionDeclaration = (FunctionDeclaration) visit(ctx.functionDeclaration());
         }
 
-        // ✅ تأكد من أن `ScopeId` يتغير داخل النطاقات
         int currentScopeId = symbolTable.getScopeId();
 
         Row row = new Row(ctx.getStart().getLine(), id, type != null ? type.getTypeName() : "unknown",
@@ -206,20 +205,17 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             }
         }
 
-        // ✅ الدخول إلى نطاق جديد للفئة
         symbolTable.enterScope();
 
         if (ctx.classBody() != null) {
             classBodyList.add((ClassBody) visit(ctx.classBody()));
         }
 
-        // ✅ تسجيل الفئة في `SymbolTable` و `SymbolTable2` مع `ScopeId` الصحيح
         Row row = new Row(ctx.getStart().getLine(), className, "Class", "Defined", symbolTable.getScopeId());
 
         symbolTable.addVariable(row);
         symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
 
-        // ✅ الخروج من نطاق الفئة
         symbolTable.exitScope();
 
         return new ClassDeclaration(className, extendsClassName, implementsList, classBodyList);
@@ -242,18 +238,15 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             returnType = (Type) visit(ctx.type());
         }
 
-        // ✅ الدخول إلى نطاق جديد للدالة
         symbolTable.enterScope();
 
         FunctionBody functionBody = (FunctionBody) visit(ctx.functionBody());
 
-        // ✅ تسجيل الدالة في `SymbolTable` و `SymbolTable2` مع `ScopeId` الصحيح
         Row row = new Row(ctx.getStart().getLine(), id, "Function", "Defined", symbolTable.getScopeId());
 
         symbolTable.addVariable(row);
         symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
 
-        // ✅ الخروج من نطاق الدالة
         symbolTable.exitScope();
 
         return new FunctionDeclaration(id, parameters, returnType, functionBody);
@@ -270,10 +263,8 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         if (ctx.decorator() != null) {
             decorator = (Decorator) visit(ctx.decorator());
 
-            // ✅ الدخول إلى نطاق جديد للمكوّن (`Component`)
             symbolTable.enterScope();
 
-            // ✅ تسجيل `Decorator` في `SymbolTable` و `SymbolTable2`
             Row row = new Row(ctx.getStart().getLine(), decorator.getId(), "Decorator", "Defined", symbolTable.getScopeId());
             symbolTable.addVariable(row);
             symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
@@ -282,13 +273,11 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         if (ctx.componentBody() != null) {
             componentBody = (ComponentBody) visit(ctx.componentBody());
 
-            // ✅ تسجيل `ComponentBody` في `SymbolTable` و `SymbolTable2`
             Row row = new Row(ctx.getStart().getLine(), "ComponentBody", "Component", componentBody.getVariableDeclarations().toString(), symbolTable.getScopeId());
             symbolTable.addVariable(row);
             symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
         }
 
-        // ✅ الخروج من نطاق المكوّن
         symbolTable.exitScope();
 
         return new ComponentDeclaration(decorator, componentBody);
@@ -462,12 +451,14 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
         FunctionBody functionBody = null;
         List<Assignments> assignments = new ArrayList<>();
+
         if (ctx.functionBody() != null) {
             functionBody = (FunctionBody) visit(ctx.functionBody());
-        } else if (ctx.assignment() != null) {
-            assignments.add((Assignments) visit(ctx.assignment()));
         }
 
+        if (ctx.assignment() != null) {
+            assignments.add((Assignments) visit(ctx.assignment()));
+        }
 
         return functionBody != null ? new ConstructorDeclaration(parameters, functionBody)
                 : new ConstructorDeclaration(parameters, assignments);
@@ -573,9 +564,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
     @Override
     public Object visitStatement(AngularParser.StatementContext ctx) {
         if (ctx.variableDeclaration() != null) {
-            VariableDeclaration varDecl = (VariableDeclaration) visit(ctx.variableDeclaration());
-
-            return new Statement(varDecl);
+            return new Statement((VariableDeclaration) visit(ctx.variableDeclaration()));
         } else if (ctx.ifStatement() != null) {
             return new Statement((ifStatement) visit(ctx.ifStatement()));
         } else if (ctx.forStatement() != null) {
@@ -589,8 +578,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         } else if (ctx.angularDirective() != null) {
             return new Statement((angularDirective) visit(ctx.angularDirective()));
         } else if (ctx.returnStatement() != null) {
-            ReturnStatement returnStmt = (ReturnStatement) visit(ctx.returnStatement());
-            return new Statement(returnStmt);
+            return new Statement((ReturnStatement) visit(ctx.returnStatement()));
         } else if (ctx.assignment() != null) {
             Object assignment = visit(ctx.assignment());
             if (assignment instanceof Assignments assignStmt) {
@@ -601,6 +589,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         }
         return null;
     }
+
 
     // Component Body
 
