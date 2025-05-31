@@ -20,7 +20,10 @@ public class VariableDeclaration {
         this.id = id;
         this.array = array;
     }
-
+    public VariableDeclaration(String varType, String identifier) {
+        this.varType = varType;
+        this.id = identifier;
+    }
     public VariableDeclaration(String varType, String id, Object object) {
         this.varType = varType;
         this.id = id;

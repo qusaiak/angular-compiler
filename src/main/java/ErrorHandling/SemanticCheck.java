@@ -61,7 +61,7 @@ public class SemanticCheck {
                 int scopeId = row.getScopeId();
                 String name = row.getVariableName();
                 String type = row.getType();
-                boolean isAssignment = row.getValue() != null; // ✅ التحقق مما إذا كان مجرد إسناد قيمة وليس تعريف جديد
+                boolean isDeclaration = type != null; // ✅ التحقق مما إذا كان تعريفًا وليس مجرد إسناد قيمة
 
                 while (curScope < scopeId) {
                     curScope++;
@@ -74,17 +74,19 @@ public class SemanticCheck {
 
                 Map<String, Integer> topScope = checkScopes.isEmpty() ? new HashMap<>() : checkScopes.peek();
 
-                // ✅ السماح بإعادة تعيين قيمة المتغير لكن منع إعادة تعريفه
-                if (topScope.containsKey(name) && !isAssignment) {
+                // ✅ التحقق مما إذا كان المتغير معرف مسبقًا في نفس النطاق
+                if (isDeclaration && topScope.containsKey(name)) {
                     Errors.add("Error: Variable '" + name + "' is already defined in scope " + scopeId);
                     System.out.println("Error: Variable '" + name + "' is already defined in scope " + scopeId);
                 } else {
-                    topScope.put(name, topScope.getOrDefault(name, 0) + 1);
-                    checkScopes.push(topScope);
+                    // ✅ السماح بإعادة الإسناد، ولكن منع `const` من التعديل
+                    if (!isDeclaration || !topScope.containsKey(name)) {
+                        topScope.put(name, topScope.getOrDefault(name, 0) + 1);
+                        checkScopes.push(topScope);
+                    }
                 }
             }
         }
     }
-
 
 }
