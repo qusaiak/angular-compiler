@@ -31,7 +31,20 @@ public class SemanticCheck {
     public void setCheckScopes(Stack<Map<String, Integer>> checkScopes) {
         this.checkScopes = checkScopes;
     }
+    // checkIfVariableUsedNotDefined
 
+    private Map<String, Boolean> declaredVariables = new HashMap<>();
+    public Map<String, Boolean> getDeclaredVariables() {
+        return declaredVariables;
+    }
+
+    public void setDeclaredVariables(Map<String, Boolean> declaredVariables) {
+        declaredVariables = declaredVariables;
+    }
+
+    public void setOneDeclaredVariable(String variableName) {
+        this.declaredVariables.put(variableName, true);
+    }
     public void check(Program program) {
         try {
             FileWriter test = new FileWriter("semantic.txt");
@@ -40,9 +53,12 @@ public class SemanticCheck {
             // Error Handling
             checkIfVariableAlreadyDefined();
 
+            // print Errors
+            printErrors();
+
             test.append("Semantic Check : \n");
             for (int i = 0; i < Errors.size(); i++) {
-                test.append(Errors.get(i) + "\n");
+                test.append(Errors.get(i)).append("\n");
             }
             test.flush();
             test.close();
@@ -80,4 +96,15 @@ public class SemanticCheck {
         }
     }
 
+        public void checkIfVariableUsedNotDefined(String variableUsedName){
+            if (!this.declaredVariables.getOrDefault(variableUsedName, false)) {
+                Errors.add("Error: Variable '" + variableUsedName + "' is used but not defined.");
+            }
+        }
+
+    private void printErrors() {
+        for (String errors: Errors) {
+            System.out.println(errors);
+        }
+    }
 }
