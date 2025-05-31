@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.antlr.v4.runtime.CharStreams.fromFileName;
@@ -19,7 +18,7 @@ import static org.antlr.v4.runtime.CharStreams.fromFileName;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        int testNumber = 5;
+        int testNumber = 7;
         String source = "src/tests/test" + testNumber + ".ts";
         CharStream cs = fromFileName(source);
         AngularLexer lexer = new AngularLexer(cs);
@@ -40,8 +39,6 @@ public class Main {
         // ✅ زيارة الشجرة
         Program program = (Program) baseVisitor.visit(tree);
 
-        // ✅ عرض الأخطاء الدلالية
-
 
 
         // ✅ طباعة الـ AST
@@ -52,7 +49,9 @@ public class Main {
         System.out.println("\n\n******** PROGRAM ********\n");
         System.out.println(program);
 
-
+        // ✅ طباعة `SymbolTable` و `SymbolTable2`
+        System.out.println("\n******** SYMBOL TABLE ********");
+        System.out.println(symbolTable.toString());
 
         System.out.println("\n******** SYMBOL TABLE 2 ********");
         System.out.println(symbolTable2.toString()); // ✅ إضافة طباعة `SymbolTable2`

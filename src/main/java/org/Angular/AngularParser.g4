@@ -1,258 +1,201 @@
-parser grammar AngularParser ;
+parser grammar AngularParser;
 
 options {tokenVocab=AngularLexer;}
 
 // Program
-program :(importStatement)* (variableDeclaration | classDeclaration | functionDeclaration | componentDeclaration)* exportStatement? EOF;
+program : (importStatement)* (variableDeclaration | classDeclaration | functionDeclaration | componentDeclaration)* exportStatement? EOF # ProgramSt;
 
 // Main Parts
-importStatement
-    : IMPORT (ID | LEFTCURLY (ID (COMMA ID)*)? RIGHTCURLY) FROM STRING SEMI
-    ;
+importStatement : IMPORT importType FROM STRING SEMI # ImportStatementSt;
+importType      : ID # ImportType_ID
+                | LEFTCURLY (ID (COMMA ID)*)? RIGHTCURLY # ImportType_Multiple
+                ;
 
-exportStatement
-    : EXPORT (DEFAULT? (classDeclaration | variableDeclaration | functionDeclaration | componentDeclaration | object) | LEFTCURLY (ID (COMMA ID)*)? RIGHTCURLY)
-    ;
+exportStatement : EXPORT exportType # ExportStatementSt;
+exportType      : DEFAULT? (classDeclaration | variableDeclaration | functionDeclaration | componentDeclaration | object) # ExportType_Object
+                | LEFTCURLY (ID (COMMA ID)*)? RIGHTCURLY # ExportType_Multiple
+                ;
 
-variableDeclaration
-    : (VAR | LET | CONST)? ID (EQUAL | COLON) (value | array | object | functionDeclaration) (SEMI | COMMA)
-    | (VAR | LET | CONST)? ID COLON type (LEFTBRACKET RIGHTBRACKET)? value? EQUAL (value | array | object | functionDeclaration) (SEMI | COMMA)
-    ;
+// Variable Declaration
+variableDeclaration : (VAR | LET | CONST)? ID (EQUAL | COLON) variableValue (SEMI | COMMA) # VariableDeclarationSt;
+variableValue       : value # VariableValue_Value
+                    | array # VariableValue_Array
+                    | object # VariableValue_Object
+                    | functionDeclaration # VariableValue_Function
+                    ;
 
-classDeclaration
-    : CLASS ID (EXTENDS ID)? (IMPLEMENTS ID (COMMA ID)*)? LEFTCURLY classBody RIGHTCURLY
-    ;
+classDeclaration : CLASS ID (EXTENDS ID)? (IMPLEMENTS ID (COMMA ID)*)? LEFTCURLY classBody RIGHTCURLY # ClassDeclarationSt;
 
-functionDeclaration
-    : FUNCTION? ID LEFTPAREN parameters? RIGHTPAREN (COLON type)? LEFTCURLY functionBody RIGHTCURLY
-    ;
+functionDeclaration : FUNCTION? ID LEFTPAREN parameters? RIGHTPAREN (COLON type)? LEFTCURLY functionBody RIGHTCURLY # FunctionDeclarationSt;
 
-componentDeclaration
-    : decorator
-    | LEFTCURLY componentBody RIGHTCURLY
-    ;
+componentDeclaration : decorator # ComponentDeclaration_Decorator
+                     | LEFTCURLY componentBody RIGHTCURLY # ComponentDeclaration_Body
+                     ;
 
 // Values
-value
-    : type
-    | array
-    | object
-    | jsxElement
-    | angularDirective
-    | interpolation
-    ;
+value : type # Value_Type
+      | array # Value_Array
+      | object # Value_Object
+      | jsxElement # Value_JsxElement
+      | angularDirective # Value_AngularDirective
+      | interpolation # Value_Interpolation
+      ;
 
-array
-    : LEFTBRACKET (value (COMMA value)*)? RIGHTBRACKET
-    ;
+array : LEFTBRACKET (value (COMMA value)*)? RIGHTBRACKET # ArraySt;
 
-object
-    : LEFTCURLY (ID COLON value (COMMA ID COLON value)*)? RIGHTCURLY
-    ;
+object : LEFTCURLY (ID COLON value (COMMA ID COLON value)*)? RIGHTCURLY # ObjectSt;
 
 // Classes
-classBody
-   : (decorator | constructorDeclaration | variableDeclaration | functionDeclaration)*
-   ;
+classBody : (decorator | constructorDeclaration | variableDeclaration | functionDeclaration)* # ClassBodySt;
 
-assignment
-   : (ID COLON type SEMI)+
-   | THIS DOT ID EQUAL (value | THIS DOT ID (DOT callFunction)?)? SEMI?
-   ;
+assignment : (ID COLON type SEMI)+ # Assignment_Type
+           | THIS DOT ID EQUAL (value | THIS DOT ID (DOT callFunction)?)? SEMI? # Assignment_Value
+           ;
 
 // Decorators
-decorator
-    : AT ID LEFTPAREN decoratorArguments* RIGHTPAREN
-    | AT ID
-    ;
+decorator : AT ID LEFTPAREN decoratorArguments* RIGHTPAREN # Decorator_WithArguments
+          | AT ID # Decorator_Simple
+          ;
+decoratorArguments : LEFTCURLY argumentContent* RIGHTCURLY # DecoratorArgumentsSt;
 
-decoratorArguments:
-    LEFTCURLY argumentContent* RIGHTCURLY
-    ;
+argumentContent : exportStatement # ArgumentContent_Export
+                | functionDeclaration # ArgumentContent_Function
+                | variableDeclaration # ArgumentContent_Variable
+                | classDeclaration # ArgumentContent_Class
+                | LEFTCURLY statement* RIGHTCURLY # ArgumentContent_Block
+                | SELECTOR COLON STRING COMMA # ArgumentContent_Selector
+                | TEMPLATE COLON HTMLSTRING jsxElement HTMLSTRING COMMA # ArgumentContent_Template
+                ;
 
-argumentContent
-    : exportStatement
-    | functionDeclaration
-    | variableDeclaration
-    | classDeclaration
-    | LEFTCURLY (statement)* RIGHTCURLY
-    | SELECTOR COLON STRING COMMA
-    | TEMPLATE COLON HTMLSTRING jsxElement HTMLSTRING COMMA
-    ;
-
-constructorDeclaration
-    : CONSTRUCTOR LEFTPAREN parameters? RIGHTPAREN LEFTCURLY (functionBody | assignment) RIGHTCURLY
-    ;
+constructorDeclaration : CONSTRUCTOR LEFTPAREN parameters? RIGHTPAREN LEFTCURLY (functionBody | assignment) RIGHTCURLY # ConstructorDeclarationSt;
 
 // Functions
 parameters
-    : (PUBLIC | PRIVATE)? ID (COLON type (EQUAL value)?)? (COMMA (PUBLIC | PRIVATE)? ID (COLON type (EQUAL value)?)?)*
-    | LEFTCURLY ID (COMMA ID)* RIGHTCURLY
+    : (PUBLIC | PRIVATE)? ID (COLON type (EQUAL value)?)? (COMMA (PUBLIC | PRIVATE)? ID (COLON type (EQUAL value)?)?)* # Parameters_Standard
+    | LEFTCURLY ID (COMMA ID)* RIGHTCURLY # Parameters_ObjectDestructuring
     ;
 
-functionBody
-    : statement* returnStatement?
-    ;
+functionBody : statement* returnStatement? # FunctionBodySt;
 
-returnStatement
-    : RETURN (value (operation value)? | jsxElement)? SEMI
-    ;
+returnStatement : RETURN (value (operation value)? | jsxElement)? SEMI # ReturnStatementSt;
 
-operation
-    : PLUS
-    | MINUS
-    | STAR
-    | DIVISION
-    | EQ
-    | NEQ
-    | GREATERTHAN
-    | GREATEREQUAL
-    | LESSTHAN
-    | LESSEQUAL
-    ;
+operation : PLUS # Operation_Plus
+          | MINUS # Operation_Minus
+          | STAR # Operation_Multiply
+          | DIVISION # Operation_Divide
+          | EQ # Operation_Equals
+          | NEQ # Operation_NotEquals
+          | GREATERTHAN # Operation_GreaterThan
+          | GREATEREQUAL # Operation_GreaterEqual
+          | LESSTHAN # Operation_LessThan
+          | LESSEQUAL # Operation_LessEqual
+          ;
 
-statement
-    : variableDeclaration
-    | ifStatement
-    | forStatement
-    | whileStatement
-    | callFunction
-    | printStatement
-    | jsxElement
-    | angularDirective
-    | returnStatement
-    | assignment
-    ;
+// Statements
+statement : variableDeclaration # Statement_VariableDeclaration
+          | ifStatement # Statement_IfStatement
+          | forStatement # Statement_ForStatement
+          | whileStatement # Statement_WhileStatement
+          | callFunction # Statement_FunctionCall
+          | printStatement # Statement_Print
+          | jsxElement # Statement_JsxElement
+          | angularDirective # Statement_AngularDirective
+          | returnStatement # Statement_Return
+          | assignment # Statement_Assignment
+          ;
 
 // Component
-componentBody
-    : variableDeclaration* functionDeclaration*
-    ;
+componentBody : variableDeclaration* functionDeclaration* # ComponentBodySt;
 
 // Conditionals And Loops
-ifStatement
-    : IF LEFTPAREN condition RIGHTPAREN LEFTCURLY statement* RIGHTCURLY (ELSE LEFTCURLY statement* RIGHTCURLY)?
-    ;
+ifStatement : IF LEFTPAREN condition RIGHTPAREN LEFTCURLY statement* RIGHTCURLY (ELSE LEFTCURLY statement* RIGHTCURLY)? # IfStatementSt;
 
-condition
-    : expression (AND | OR) expression
-    | expression
-    ;
+condition : expression (AND | OR) expression # Condition_Boolean
+          | expression # Condition_Simple
+          ;
 
-forStatement
-    : FOR LEFTPAREN variableDeclaration? condition? SEMI? statement? RIGHTPAREN LEFTCURLY statement* RIGHTCURLY
-    ;
+forStatement : FOR LEFTPAREN variableDeclaration? condition? SEMI? statement? RIGHTPAREN LEFTCURLY statement* RIGHTCURLY # ForStatementSt;
 
-whileStatement
-    : WHILE LEFTPAREN condition RIGHTPAREN LEFTCURLY statement* RIGHTCURLY
-    ;
+whileStatement : WHILE LEFTPAREN condition RIGHTPAREN LEFTCURLY statement* RIGHTCURLY # WhileStatementSt;
 
 // Function Calls
-callFunction
-    : ID LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN SEMI
-    ;
+callFunction : ID LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN SEMI # CallFunctionSt;
 
 // Jsx Element
-jsxElement
-    : openingTag jsxContent* closingTag
-    | selfClosingTag
-    ;
+jsxElement : openingTag jsxContent* closingTag # JsxElement_Tagged
+           | selfClosingTag # JsxElement_SelfClosing
+           ;
 
 // Opening Tag
-openingTag
-    : LESSTHAN ID jsxAttributes? GREATERTHAN
-    ;
+openingTag : LESSTHAN ID jsxAttributes? GREATERTHAN # OpeningTagSt;
 
 // Closing Tag
-closingTag
-    : LESSTHAN DIVISION ID GREATERTHAN
-    ;
+closingTag : LESSTHAN DIVISION ID GREATERTHAN # ClosingTagSt;
 
 // Self-Closing Tag
-selfClosingTag
-    : LESSTHAN ID jsxAttributes? SLASHGREATERTHAN
-    ;
+selfClosingTag : LESSTHAN ID jsxAttributes? SLASHGREATERTHAN # SelfClosingTagSt;
 
-// jsx Content
-jsxContent
-    : jsxElement
-    | interpolation
-    | ID
-    ;
+// Jsx Content
+jsxContent : jsxElement # JsxContent_Element
+           | interpolation # JsxContent_Interpolation
+           | ID # JsxContent_ID
+           ;
 
 // Interpolation
-interpolation
-    : DOUBLELEFTCURLY expression DOUBLERIGHTCURLY
-    ;
+interpolation : DOUBLELEFTCURLY expression DOUBLERIGHTCURLY # InterpolationSt;
 
-// jsx Attributes
-jsxAttributes
-    : (angularDirective | jsxAttribute | jsxEvent | jsxBinding | jsxClass)+
-    ;
+// Jsx Attributes
+jsxAttributes : (angularDirective | jsxAttribute | jsxEvent | jsxBinding | jsxClass)+ # JsxAttributesSt;
 
 // Angular Directive
-angularDirective
-    : STAR directive EQUAL STRING
-    ;
+angularDirective : STAR directive EQUAL STRING # AngularDirectiveSt;
 
-directive
-    : NGIF
-    | NGSWITCH
-    | NGFOR
-    | NGSTYLE
-    | NGCLASS
-    ;
+directive : NGIF # Directive_NgIf
+          | NGSWITCH # Directive_NgSwitch
+          | NGFOR # Directive_NgFor
+          | NGSTYLE # Directive_NgStyle
+          | NGCLASS # Directive_NgClass
+          ;
 
-// jsx Attribute
-jsxAttribute
-    : ID EQUAL STRING
-    ;
+// Jsx Attribute
+jsxAttribute : ID EQUAL STRING # JsxAttributeSt;
 
-// jsx Event
-jsxEvent
-    : LEFTPAREN ID RIGHTPAREN EQUAL STRING
-    ;
+// Jsx Event
+jsxEvent : LEFTPAREN ID RIGHTPAREN EQUAL STRING # JsxEventSt;
 
-// jsx Binding
-jsxBinding
-    : LEFTBRACKET ID RIGHTBRACKET EQUAL (STRING | interpolation)
-    ;
+// Jsx Binding
+jsxBinding : LEFTBRACKET ID RIGHTBRACKET EQUAL (STRING | interpolation) # JsxBindingSt;
 
-// jsx Class
-jsxClass
-    : CLASS EQUAL STRING
-    ;
+// Jsx Class
+jsxClass : CLASS EQUAL STRING # JsxClassSt;
 
 // Expression
-expression
-    : ID
-    | ID DOT ID
-    | STRING
-    | INT
-    | DOUBLE
-    | BOOLEAN
-    | value
-    | callFunction
-    | array
-    | object
-    | expression operation expression
-    ;
+expression : ID # Expression_ID
+           | ID DOT ID # Expression_MemberAccess
+           | STRING # Expression_String
+           | INT # Expression_Int
+           | DOUBLE # Expression_Double
+           | BOOLEAN # Expression_Boolean
+           | value # Expression_Value
+           | callFunction # Expression_FunctionCall
+           | array # Expression_Array
+           | object # Expression_Object
+           | expression operation expression # Expression_Operation
+           ;
 
 // Types
-type
-    : ID
-    | STRING
-    | INT
-    | DOUBLE
-    | BOOLEAN
-    | ANY
-    | PUBLIC
-    | PRIVATE
-    | VOID
-    | NUMBER
-    | NULL
-    ;
+type : ID # Type_ID
+     | STRING # Type_String
+     | INT # Type_Int
+     | DOUBLE # Type_Double
+     | BOOLEAN # Type_Boolean
+     | ANY # Type_Any
+     | PUBLIC # Type_Public
+     | PRIVATE # Type_Private
+     | VOID # Type_Void
+     | NUMBER # Type_Number
+     | NULL # Type_Null
+     ;
 
 // Print
-printStatement
-    : CONSOLE DOT LOG LEFTPAREN expression RIGHTPAREN SEMI;
+printStatement : CONSOLE DOT LOG LEFTPAREN expression RIGHTPAREN SEMI # PrintStatementSt;

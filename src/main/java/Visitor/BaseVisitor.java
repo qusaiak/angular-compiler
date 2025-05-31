@@ -82,12 +82,12 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
         importStatement.setFrom(ctx.STRING().getText());
 
-        // ✅ تسجيل `ImportStatement` داخل `Row`
+        // ✅ إدخال `importStatement` ضمن نطاق البرنامج وليس النطاقات الداخلية
         Row row = new Row(ctx.getStart().getLine(),
                 importStatement.getId() != null ? importStatement.getId() : "Multiple Imports",
                 "Import",
                 importStatement.getFrom(),
-                symbolTable.getScopeId());
+                0); // جعل النطاق 0 لأنه ينتمي لنطاق عالمي وليس دالة أو كتلة
 
         // ✅ إضافة `Row` إلى `SymbolTable` و `SymbolTable2`
         symbolTable.addVariable(row);
@@ -173,11 +173,11 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             functionDeclaration = (FunctionDeclaration) visit(ctx.functionDeclaration());
         }
 
-
-
+        // ✅ تأكد من أن `ScopeId` يتغير داخل النطاقات
+        int currentScopeId = symbolTable.getScopeId();
 
         Row row = new Row(ctx.getStart().getLine(), id, type != null ? type.getTypeName() : "unknown",
-                value != null ? value.toString() : "undefined", symbolTable.getScopeId());
+                value != null ? value.toString() : "undefined", currentScopeId);
 
         symbolTable.addVariable(row);
         symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
@@ -188,6 +188,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             return new VariableDeclaration(varType, id, object != null ? object : functionDeclaration);
         }
     }
+
 
 
     // Class Declaration
@@ -205,18 +206,21 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             }
         }
 
+        // ✅ الدخول إلى نطاق جديد للفئة
+        symbolTable.enterScope();
+
         if (ctx.classBody() != null) {
             classBodyList.add((ClassBody) visit(ctx.classBody()));
         }
 
-
-
-
-
+        // ✅ تسجيل الفئة في `SymbolTable` و `SymbolTable2` مع `ScopeId` الصحيح
         Row row = new Row(ctx.getStart().getLine(), className, "Class", "Defined", symbolTable.getScopeId());
 
         symbolTable.addVariable(row);
         symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
+
+        // ✅ الخروج من نطاق الفئة
+        symbolTable.exitScope();
 
         return new ClassDeclaration(className, extendsClassName, implementsList, classBodyList);
     }
@@ -238,19 +242,23 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             returnType = (Type) visit(ctx.type());
         }
 
+        // ✅ الدخول إلى نطاق جديد للدالة
+        symbolTable.enterScope();
+
         FunctionBody functionBody = (FunctionBody) visit(ctx.functionBody());
 
-
-
-
-        // ✅ تسجيل الدالة في `SymbolTable` و `SymbolTable2`
+        // ✅ تسجيل الدالة في `SymbolTable` و `SymbolTable2` مع `ScopeId` الصحيح
         Row row = new Row(ctx.getStart().getLine(), id, "Function", "Defined", symbolTable.getScopeId());
 
         symbolTable.addVariable(row);
         symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
 
+        // ✅ الخروج من نطاق الدالة
+        symbolTable.exitScope();
+
         return new FunctionDeclaration(id, parameters, returnType, functionBody);
     }
+
 
 // component decleration
 
@@ -262,11 +270,13 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         if (ctx.decorator() != null) {
             decorator = (Decorator) visit(ctx.decorator());
 
+            // ✅ الدخول إلى نطاق جديد للمكوّن (`Component`)
+            symbolTable.enterScope();
+
             // ✅ تسجيل `Decorator` في `SymbolTable` و `SymbolTable2`
             Row row = new Row(ctx.getStart().getLine(), decorator.getId(), "Decorator", "Defined", symbolTable.getScopeId());
             symbolTable.addVariable(row);
             symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
-
         }
 
         if (ctx.componentBody() != null) {
@@ -276,12 +286,14 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
             Row row = new Row(ctx.getStart().getLine(), "ComponentBody", "Component", componentBody.getVariableDeclarations().toString(), symbolTable.getScopeId());
             symbolTable.addVariable(row);
             symbolTable2.addVariable(row.getLine(), row.getVariableName(), row.getType(), row.getValue());
-
-
         }
+
+        // ✅ الخروج من نطاق المكوّن
+        symbolTable.exitScope();
 
         return new ComponentDeclaration(decorator, componentBody);
     }
+
 
 
 
