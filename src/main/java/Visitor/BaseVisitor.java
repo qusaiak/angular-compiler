@@ -456,12 +456,14 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
         FunctionBody functionBody = null;
         List<Assignments> assignments = new ArrayList<>();
+
         if (ctx.functionBody() != null) {
             functionBody = (FunctionBody) visit(ctx.functionBody());
-        } else if (ctx.assignment() != null) {
-            assignments.add((Assignments) visit(ctx.assignment()));
         }
 
+        if (ctx.assignment() != null) {
+            assignments.add((Assignments) visit(ctx.assignment()));
+        }
 
         return functionBody != null ? new ConstructorDeclaration(parameters, functionBody)
                 : new ConstructorDeclaration(parameters, assignments);
@@ -567,9 +569,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
     @Override
     public Object visitStatement(AngularParser.StatementContext ctx) {
         if (ctx.variableDeclaration() != null) {
-            VariableDeclaration varDecl = (VariableDeclaration) visit(ctx.variableDeclaration());
-
-            return new Statement(varDecl);
+            return new Statement((VariableDeclaration) visit(ctx.variableDeclaration()));
         } else if (ctx.ifStatement() != null) {
             return new Statement((ifStatement) visit(ctx.ifStatement()));
         } else if (ctx.forStatement() != null) {
@@ -583,8 +583,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         } else if (ctx.angularDirective() != null) {
             return new Statement((angularDirective) visit(ctx.angularDirective()));
         } else if (ctx.returnStatement() != null) {
-            ReturnStatement returnStmt = (ReturnStatement) visit(ctx.returnStatement());
-            return new Statement(returnStmt);
+            return new Statement((ReturnStatement) visit(ctx.returnStatement()));
         } else if (ctx.assignment() != null) {
             Object assignment = visit(ctx.assignment());
             if (assignment instanceof Assignments assignStmt) {
@@ -595,6 +594,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
         }
         return null;
     }
+
 
     // Component Body
 
