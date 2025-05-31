@@ -1,1 +1,2 @@
 Semantic Check : 
+Line 7: (Error: Variable 't' is already defined in scope 0).

@@ -1,4 +1,4 @@
-// Generated from C:/compiler/compiler/src/main/java/org/Angular/AngularParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/DELL/IdeaProjects/Angular/src/main/java/org/Angular/AngularParser.g4 by ANTLR 4.13.2
 package org.Angular;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -66,34 +66,6 @@ public interface AngularParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitVariableDeclarationSt(AngularParser.VariableDeclarationStContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code VariableValue_Value}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableValue_Value(AngularParser.VariableValue_ValueContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code VariableValue_Array}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableValue_Array(AngularParser.VariableValue_ArrayContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code VariableValue_Object}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableValue_Object(AngularParser.VariableValue_ObjectContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code VariableValue_Function}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableValue_Function(AngularParser.VariableValue_FunctionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ClassDeclarationSt}
 	 * labeled alternative in {@link AngularParser#classDeclaration}.

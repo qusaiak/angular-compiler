@@ -31,6 +31,10 @@ public class SemanticCheck {
     public void setCheckScopes(Stack<Map<String, Integer>> checkScopes) {
         this.checkScopes = checkScopes;
     }
+
+    // checkIfVariableIsDefinedAndConst
+    private final Map<String, Boolean> usedConstVariables = new HashMap<>();
+
     // checkIfVariableUsedNotDefined
 
     private Map<String, Boolean> declaredVariables = new HashMap<>();
@@ -70,45 +74,41 @@ public class SemanticCheck {
     public void checkIfVariableAlreadyDefined() {
         List<Row> variables = symbolTable.getRows();
         if (!variables.isEmpty()) {
-            int curScope = 0;
+            int cur = 0;
             checkScopes.push(new HashMap<>());
-
             for (Row row : variables) {
+                int line = row.getLine();
                 int scopeId = row.getScopeId();
                 String name = row.getVariableName();
-                String type = row.getType();
-                boolean isAssignment = row.getValue() != null; // ✅ التحقق مما إذا كان مجرد إسناد قيمة وليس تعريف جديد
-
-                while (curScope < scopeId) {
-                    curScope++;
+                while (cur < scopeId) {
+                    cur++;
                     checkScopes.push(new HashMap<>());
                 }
-                while (curScope > scopeId) {
+                while (cur > scopeId) {
                     checkScopes.pop();
-                    curScope--;
+                    cur--;
                 }
-
-                Map<String, Integer> topScope = checkScopes.isEmpty() ? new HashMap<>() : checkScopes.peek();
-
-                // ✅ السماح بإعادة تعيين قيمة المتغير لكن منع إعادة تعريفه
-                if (topScope.containsKey(name) && !isAssignment) {
-                    Errors.add("Error: Variable '" + name + "' is already defined in scope " + scopeId);
-                    System.out.println("Error: Variable '" + name + "' is already defined in scope " + scopeId);
+                Map<String, Integer> top = checkScopes.peek();
+                if (top.getOrDefault(name, 0) > 0) {
+                    // Error
+                    Errors.add("Line " + line + ": (Error: Variable '" + name + "' is already defined in scope " + scopeId + ").");
                 } else {
-                    topScope.put(name, topScope.getOrDefault(name, 0) + 1);
-                    checkScopes.push(topScope);
+                    top.put(name, top.getOrDefault(name, 0) + 1);
                 }
             }
         }
+
     }
-
-
         public void checkIfVariableUsedNotDefined(String variableUsedName){
             if (!this.declaredVariables.getOrDefault(variableUsedName, false)) {
                 Errors.add("Error: Variable '" + variableUsedName + "' is used but not defined.");
             }
         }
-
+//    public void checkIfVariableIsConst(String variableUsedName, int linqe) {
+//        if (this.usedConstVariables.getOrDefault(variableUsedName, false)) {
+//            Errors.add("Line "+ line + ": (Error: You cannot assign a value to a constant variable: " + variableUsedName + ").");
+//        }
+//    }
     private void printErrors() {
         for (String errors: Errors) {
             System.out.println(errors);

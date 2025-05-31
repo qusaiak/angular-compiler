@@ -1,4 +1,4 @@
-// Generated from C:/compiler/compiler/src/main/java/org/Angular/AngularParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/DELL/IdeaProjects/Angular/src/main/java/org/Angular/AngularParser.g4 by ANTLR 4.13.2
 package org.Angular;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -103,54 +103,6 @@ public interface AngularParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVariableDeclarationSt(AngularParser.VariableDeclarationStContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VariableValue_Value}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableValue_Value(AngularParser.VariableValue_ValueContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VariableValue_Value}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableValue_Value(AngularParser.VariableValue_ValueContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VariableValue_Array}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableValue_Array(AngularParser.VariableValue_ArrayContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VariableValue_Array}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableValue_Array(AngularParser.VariableValue_ArrayContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VariableValue_Object}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableValue_Object(AngularParser.VariableValue_ObjectContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VariableValue_Object}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableValue_Object(AngularParser.VariableValue_ObjectContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VariableValue_Function}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableValue_Function(AngularParser.VariableValue_FunctionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VariableValue_Function}
-	 * labeled alternative in {@link AngularParser#variableValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableValue_Function(AngularParser.VariableValue_FunctionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ClassDeclarationSt}
 	 * labeled alternative in {@link AngularParser#classDeclaration}.

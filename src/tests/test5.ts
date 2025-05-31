@@ -1,9 +1,11 @@
 // Variable declaration
-let x: number =44;
-let y: number=6;
+let x: int =44;
+let y: int=6;
 
 let z: boolean=true;
+const t: boolean=true;
+t=false;
 
 const anotherVar: string = "hello";
 
-var arrayVar: number[] = [1, 2, 3];
+var arrayVar: int[] = [1, 2, 3];

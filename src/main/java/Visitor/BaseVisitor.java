@@ -1,6 +1,8 @@
 package Visitor;
 
 import AST.*;
+
+import ErrorHandling.SemanticCheck;
 import SymbolTable.Row;
 import SymbolTable.SymbolTable;
 import SymbolTable.SymbolTable2;
@@ -17,6 +19,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
     SymbolTable symbolTable = new SymbolTable();
     SymbolTable2 symbolTable2 = new SymbolTable2();
+    SemanticCheck semanticCheck;
     public SymbolTable getSymbolTable() {
         return symbolTable;
     }
@@ -244,7 +247,7 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
     }
 
 
-// component decleration
+// component declaration
 
     @Override
     public Object visitComponentDeclaration_Body(AngularParser.ComponentDeclaration_BodyContext ctx) {
@@ -280,21 +283,37 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
     @Override
     public Object visitValue_Type(AngularParser.Value_TypeContext ctx) {
-        if (ctx.getRuleContext(AngularParser.Type_IDContext.class, 0) != null) {
-            return new Value(String.valueOf(visit(ctx.getRuleContext(AngularParser.Type_IDContext.class, 0))));
-        } else if (ctx.getRuleContext(AngularParser.Value_ArrayContext.class, 0) != null) {
-            return new Value(String.valueOf(visit(ctx.getRuleContext(AngularParser.Value_ArrayContext.class, 0))));
-        } else if (ctx.getRuleContext(AngularParser.Value_ObjectContext.class, 0) != null) {
-            return new Value(String.valueOf(visit(ctx.getRuleContext(AngularParser.Value_ObjectContext.class, 0))));
-        } else if (ctx.getRuleContext(AngularParser.Value_JsxElementContext.class, 0) != null) {
-            return new Value(String.valueOf(visit(ctx.getRuleContext(AngularParser.Value_JsxElementContext.class, 0))));
-        } else if (ctx.getRuleContext(AngularParser.Value_AngularDirectiveContext.class, 0) != null) {
-            return new Value(String.valueOf(visit(ctx.getRuleContext(AngularParser.Value_AngularDirectiveContext.class, 0))));
-        } else if (ctx.getRuleContext(AngularParser.Value_InterpolationContext.class, 0) != null) {
-            return new Value(String.valueOf(visit(ctx.getRuleContext(AngularParser.Value_InterpolationContext.class, 0))));
-        }
+        Object result = visit(ctx.type());
+        return new Value(String.valueOf(result));
+    }
 
-        return null;
+    @Override
+    public Object visitValue_Array(AngularParser.Value_ArrayContext ctx) {
+        return visit(ctx.array());
+    }
+
+
+
+
+    @Override
+    public Object visitValue_Object(AngularParser.Value_ObjectContext ctx) {
+        Object result = visit(ctx.object());
+        return new Value(String.valueOf(result));
+    }
+    @Override
+    public Object visitValue_JsxElement(AngularParser.Value_JsxElementContext ctx) {
+        Object result = visit(ctx.jsxElement());
+        return new Value(String.valueOf(result));
+    }
+    @Override
+    public Object visitValue_AngularDirective(AngularParser.Value_AngularDirectiveContext ctx) {
+        Object result = visit(ctx.angularDirective());
+        return new Value(String.valueOf(result));
+    }
+    @Override
+    public Object visitValue_Interpolation(AngularParser.Value_InterpolationContext ctx) {
+        Object result = visit(ctx.interpolation());
+        return new Value(String.valueOf(result));
     }
 
 
@@ -302,17 +321,25 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
     @Override
     public Object visitArraySt(AngularParser.ArrayStContext ctx) {
-        Array array = new Array();
+        System.out.println("Visiting array with " + (ctx.value() == null ? 0 : ctx.value().size()) + " elements.");
 
-        for (int i = 0; i < ctx.value().size(); i++) {
-            Value value = (Value) visit(ctx.value(i));
+        List<Value> elements = new ArrayList<>();
 
+        List<AngularParser.ValueContext> values = ctx.value();
 
-            array.addValue(value);
+        if (values != null) {
+            for (AngularParser.ValueContext valCtx : values) {
+                Value value = (Value) visit(valCtx);
+                System.out.println("Visited element: " + value);
+                elements.add(value);
+            }
         }
 
-        return array;
+        Value arrayValue = new Value(elements);
+        System.out.println("Constructed array value: " + arrayValue);
+        return arrayValue;
     }
+
 
 
 
@@ -938,6 +965,46 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
     @Override
     public Object visitType_ID(AngularParser.Type_IDContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_String(AngularParser.Type_StringContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Int(AngularParser.Type_IntContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Double(AngularParser.Type_DoubleContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Boolean(AngularParser.Type_BooleanContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Any(AngularParser.Type_AnyContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Public(AngularParser.Type_PublicContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Private(AngularParser.Type_PrivateContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Null(AngularParser.Type_NullContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Number(AngularParser.Type_NumberContext ctx) {
+        return new Type(ctx.getText());
+    }
+    @Override
+    public Object visitType_Void(AngularParser.Type_VoidContext ctx) {
         return new Type(ctx.getText());
     }
 

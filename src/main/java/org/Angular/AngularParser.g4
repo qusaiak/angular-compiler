@@ -17,12 +17,7 @@ exportType      : DEFAULT? (classDeclaration | variableDeclaration | functionDec
                 ;
 
 // Variable Declaration
-variableDeclaration : (VAR | LET | CONST)? ID (EQUAL | COLON) variableValue (SEMI | COMMA) # VariableDeclarationSt;
-variableValue       : value # VariableValue_Value
-                    | array # VariableValue_Array
-                    | object # VariableValue_Object
-                    | functionDeclaration # VariableValue_Function
-                    ;
+variableDeclaration : (VAR | LET | CONST)? ID (EQUAL | COLON) type? value? EQUAL? value (SEMI | COMMA) # VariableDeclarationSt;
 
 classDeclaration : CLASS ID (EXTENDS ID)? (IMPLEMENTS ID (COMMA ID)*)? LEFTCURLY classBody RIGHTCURLY # ClassDeclarationSt;
 
