@@ -15,6 +15,9 @@ public class BaseVisitor extends AngularParserBaseVisitor<Object> {
 
     SymbolTable symbolTable = new SymbolTable();
     SymbolTable2 symbolTable2 = new SymbolTable2();
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
 
 
     public void setSymbolTable(SymbolTable symbolTable) {
