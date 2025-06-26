@@ -1,0 +1,24 @@
+const result = 5 + 3;
+
+const result2 = 5 * 3;
+
+let num = 5;
+const preIncrementResult = ++num;
+const preDecreaseResult = --num;
+
+const object = {
+  property: {
+    nestedProperty: 'value'
+  }
+};
+
+const result3 = object.property.nestedProperty;
+
+const Component = () => {
+  const object = {
+    property: {
+      nestedProperty: 'value'
+    }
+  };
+  return <div>{object.property.nestedProperty}</div>;
+};
