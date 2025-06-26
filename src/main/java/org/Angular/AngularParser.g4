@@ -1,197 +1,408 @@
 parser grammar AngularParser;
 
-options {tokenVocab=AngularLexer;}
+options { tokenVocab=AngularLexer; }
 
-// Program
-program : (importStatement)* (variableDeclaration | classDeclaration | functionDeclaration | componentDeclaration)* exportStatement? EOF # ProgramSt;
+program: statement+ EOF;
 
-// Main Parts
-importStatement : IMPORT importType FROM STRING SEMI # ImportStatementSt;
-importType      : ID # ImportType_ID
-                | LEFTCURLY (ID (COMMA ID)*)? RIGHTCURLY # ImportType_Multiple
-                ;
-
-exportStatement : EXPORT exportType # ExportStatementSt;
-exportType      : DEFAULT? (classDeclaration | variableDeclaration | functionDeclaration | componentDeclaration | object) # ExportType_Object
-                | LEFTCURLY (ID (COMMA ID)*)? RIGHTCURLY # ExportType_Multiple
-                ;
-
-// Variable Declaration
-variableDeclaration : (VAR | LET | CONST)? ID (EQUAL | COLON) type? value? EQUAL? value (SEMI | COMMA) # VariableDeclarationSt;
-
-classDeclaration : CLASS ID (EXTENDS ID)? (IMPLEMENTS ID (COMMA ID)*)? LEFTCURLY classBody RIGHTCURLY # ClassDeclarationSt;
-
-functionDeclaration : FUNCTION? ID LEFTPAREN parameters? RIGHTPAREN (COLON type)? LEFTCURLY functionBody RIGHTCURLY # FunctionDeclarationSt;
-
-componentDeclaration : decorator # ComponentDeclaration_Decorator
-                     | LEFTCURLY componentBody RIGHTCURLY # ComponentDeclaration_Body
-                     ;
-
-// Values
-value : type # Value_Type
-      | array # Value_Array
-      | object # Value_Object
-      | jsxElement # Value_JsxElement
-      | angularDirective # Value_AngularDirective
-      | interpolation # Value_Interpolation
-      ;
-
-array : LEFTBRACKET (value (COMMA value)*)? RIGHTBRACKET # ArraySt;
-
-object : LEFTCURLY (ID COLON value (COMMA ID COLON value)*)? RIGHTCURLY # ObjectSt;
-
-// Classes
-classBody : (decorator | constructorDeclaration | variableDeclaration | functionDeclaration)* # ClassBodySt;
-
-assignment : (ID COLON type )+ (EQUAL value)? SEMI # Assignment_Type
-           | THIS DOT ID EQUAL (value | THIS DOT ID (DOT callFunction)?)? SEMI? # Assignment_Value
-           | ID EQUAL value SEMI             # Assignment_Value2
-           ;
-
-// Decorators
-decorator : AT ID LEFTPAREN decoratorArguments* RIGHTPAREN # Decorator_WithArguments
-          | AT ID # Decorator_Simple
-          ;
-decoratorArguments : LEFTCURLY argumentContent* RIGHTCURLY # DecoratorArgumentsSt;
-
-argumentContent : exportStatement # ArgumentContent_Export
-                | functionDeclaration # ArgumentContent_Function
-                | variableDeclaration # ArgumentContent_Variable
-                | classDeclaration # ArgumentContent_Class
-                | LEFTCURLY statement* RIGHTCURLY # ArgumentContent_Block
-                | SELECTOR COLON STRING COMMA # ArgumentContent_Selector
-                | TEMPLATE COLON HTMLSTRING jsxElement HTMLSTRING COMMA # ArgumentContent_Template
-                ;
-
-constructorDeclaration : CONSTRUCTOR LEFTPAREN parameters? RIGHTPAREN LEFTCURLY (functionBody | assignment) RIGHTCURLY # ConstructorDeclarationSt;
-
-// Functions
-parameters
-    : (PUBLIC | PRIVATE)? ID (COLON type (EQUAL value)?)? (COMMA (PUBLIC | PRIVATE)? ID (COLON type (EQUAL value)?)?)* # Parameters_Standard
-    | LEFTCURLY ID (COMMA ID)* RIGHTCURLY # Parameters_ObjectDestructuring
+statement
+    : block                               # BlockSt
+    | decorator                            #DecoratorSt
+    | printStatement                      # PrintStatementSt
+    | arrayAccess                         # ArrayAccessSt
+    | variableStatement                   # VariableStatementSt
+    | importStatement                     # ImportStatementSt
+    | exportStatement                     # ExportStatementSt
+    | ifStatement                         # IfStatementSt
+    | iterationStatement                  # IterationStatementSt
+    | switchStatement                     # SwitchStatementSt
+    | functionDeclartion                  # FunctionDeclartionSt
+    | functionCall                        # FunctionCallSt
+    | expression SEMI_COLON?              # ExpressionSt
     ;
 
-functionBody : statement* returnStatement? # FunctionBodySt;
+block: OPEN_BRACE statement* CLOSE_BRACE SEMI_COLON?;
 
-returnStatement : RETURN (value (operation value)? | jsxElement)? SEMI # ReturnStatementSt;
+printStatement
+    : CONSOLE DOT LOG OPEN_PAREN (expression)? CLOSE_PAREN SEMI_COLON?
+    ;
 
-operation : PLUS # Operation_Plus
-          | MINUS # Operation_Minus
-          | STAR # Operation_Multiply
-          | DIVISION # Operation_Divide
-          | EQ # Operation_Equals
-          | NEQ # Operation_NotEquals
-          | GREATERTHAN # Operation_GreaterThan
-          | GREATEREQUAL # Operation_GreaterEqual
-          | LESSTHAN # Operation_LessThan
-          | LESSEQUAL # Operation_LessEqual
-          ;
+arrayAccess
+    : IDENTIFIER OPEN_BRACKET expression CLOSE_BRACKET
+    ;
 
-// Statements
-statement : variableDeclaration # Statement_VariableDeclaration
-          | ifStatement # Statement_IfStatement
-          | forStatement # Statement_ForStatement
-          | whileStatement # Statement_WhileStatement
-          | callFunction # Statement_FunctionCall
-          | printStatement # Statement_Print
-          | jsxElement # Statement_JsxElement
-          | angularDirective # Statement_AngularDirective
-          | returnStatement # Statement_Return
-          | assignment # Statement_Assignment
-          ;
+////////////////////////////////////////////////////////////////////////////////
+// import
 
-// Component
-componentBody : variableDeclaration* functionDeclaration* # ComponentBodySt;
+importStatement : IMPORT importDeclaration (FROM STRING)? SEMI_COLON?;
 
-// Conditionals And Loops
-ifStatement : IF LEFTPAREN condition RIGHTPAREN LEFTCURLY statement* RIGHTCURLY (ELSE LEFTCURLY statement* RIGHTCURLY)? # IfStatementSt;
+importDeclaration
+    : importDefaultSpecifier
+    | importNamespaceSpecifier
+    | importNamedSpecifier;
 
-condition : expression (AND | OR) expression # Condition_Boolean
-          | expression # Condition_Simple
-          ;
+importDefaultSpecifier : IDENTIFIER | STRING;
 
-forStatement : FOR LEFTPAREN variableDeclaration? condition? SEMI? statement? RIGHTPAREN LEFTCURLY statement* RIGHTCURLY # ForStatementSt;
+importNamespaceSpecifier: MULTIPLY AS IDENTIFIER;
 
-whileStatement : WHILE LEFTPAREN condition RIGHTPAREN LEFTCURLY statement* RIGHTCURLY # WhileStatementSt;
+importNamedSpecifier
+    : (importSpecifier COMMA)* OPEN_BRACE (importSpecifier (COMMA importSpecifier)* COMMA?)? CLOSE_BRACE;
 
-// Function Calls
-callFunction : ID LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN SEMI # CallFunctionSt;
+importSpecifier
+    : IDENTIFIER
+    | angularDecoratorName
+    | IDENTIFIER AS IDENTIFIER
+    ;
 
-// Jsx Element
-jsxElement : openingTag jsxContent* closingTag # JsxElement_Tagged
-           | selfClosingTag # JsxElement_SelfClosing
+////////////////////////////////////////////////////////////////////////////////
+// export
+
+exportStatement
+    : exportDefaultDeclaration
+    | exportDeclaration
+    | exportListDeclaration
+    ;
+
+exportDefaultDeclaration
+    : EXPORT DEFAULT_CASE expression SEMI_COLON?
+    ;
+
+exportDeclaration
+    : EXPORT (variableStatement | classDeclaration | functionDeclartion) SEMI_COLON?
+    ;
+
+exportListDeclaration
+    : EXPORT (CLASS IDENTIFIER)? OPEN_BRACE (  exportSpecifier (COMMA exportSpecifier)* COMMA?)? CLOSE_BRACE (FROM STRING)? SEMI_COLON?
+    ;
+
+exportSpecifier
+    : IDENTIFIER
+    | IDENTIFIER AS IDENTIFIER
+    | AT? angularDecoratorName (OPEN_PAREN CLOSE_PAREN IDENTIFIER COLON type SEMI_COLON)?
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// class
+
+classDeclaration
+    : decorator? EXPORT? DEFAULT_CASE? CLASS IDENTIFIER (EXTENDS expression)?(IMPLEMENTS IDENTIFIER(COMMA IDENTIFIER)*)? OPEN_BRACE classMember* CLOSE_BRACE
+    ;
+
+
+
+classMember
+    : decorator* variableDeclaration SEMI_COLON?   # DecoratedProperty
+    | decorator* classMethodDeclaration                     # DecoratedMethod
+    | constructorDeclaration                                # ConstructorMember
+    ;
+
+classMethodDeclaration
+    : accessModifier? IDENTIFIER OPEN_PAREN parameterList? CLOSE_PAREN block
+    ;
+
+constructorDeclaration
+    : CONSTRUCTOR OPEN_PAREN parameterList? CLOSE_PAREN block
+    ;
+
+parameterList
+    : parameter (COMMA parameter)* ;
+
+parameter
+    : accessModifier? IDENTIFIER COLON typeAnnotation (ASSING expression)?
+    ;
+
+accessModifier
+    : PUBLIC | PRIVATE | PROTECTED
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// variable
+
+variableStatement
+    : varHelpers variableDeclaration (COMMA variableDeclaration)* SEMI_COLON              # VariableDeclarationVr
+    | CONST variableDeclarationConst (COMMA variableDeclarationConst)* SEMI_COLON?         # VariableDeclarationConstVr
+    ;
+
+variableDeclarationConst
+    : variableType COLON? typeAnnotation ASSING value                                 # VariableTypedAndAssignedConst
+    | variableType ASSING expression                                                       # VariableAssignedConstOnly
+    ;
+
+variableDeclaration
+    : variableType COLON? typeAnnotation (ASSING expression)?                              # VariableTypedAndMaybeAssigned
+    | variableType (ASSING expression)?                                                    # VariableUntyped
+    ;
+
+variableType
+    : IDENTIFIER                      # IdentifierVt
+    | arrayDeclaration                # ArrayDeclarationVt
+    | objectDeclaration               # ObjectDeclarationVt
+    ;
+
+typeAnnotation
+    : type arraySuffix?                                                                                                                      # TypeWithArray
+    |OPEN_BRACE (IDENTIFIER  COLON type COMMA?)* CLOSE_BRACE ASSING OPEN_BRACE (IDENTIFIER  COLON value COMMA?)* CLOSE_BRACE SEMI_COLON      #TypeWithObject
+    |inlineObjectType arraySuffix?                                                                                                                 #InlineObjectArray
+    ;
+
+inlineObjectType
+    : OPEN_BRACE typeMember (COMMA typeMember)* CLOSE_BRACE (OR1  value)?
+    ;
+
+typeMember
+    : IDENTIFIER COLON type
+    ;
+
+
+arraySuffix
+    : OPEN_BRACKET CLOSE_BRACKET
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// object & array literals
+
+objectDeclaration
+    : OPEN_BRACE (objectProperty (COMMA objectProperty)* COMMA?)? CLOSE_BRACE
+    ;
+
+objectProperty
+    : IDENTIFIER COLON expression                  # NamedObjectProperty
+    | expression                                   # ShorthandOrDynamicProperty
+    ;
+
+arrayDeclaration
+    : OPEN_BRACKET COMMA* (expression (COMMA expression)* COMMA?)? CLOSE_BRACKET
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// expression
+
+expression
+    : functionDeclartion                     # FunctionExpression
+    | functionCall                           # FunctionCallExpression
+    | arrayAccess                            # ArrayAccessExpression
+    | expression QUESTION_MARK? DOT HASH_TAG? expression        # MemberDotExpression
+    | expression PLUS_PLUS                   # PostIncrementExpression
+    | expression MINUS_MINUS                 # PostDecreaseExpression
+    | PLUS_PLUS expression                   # PreIncrementExpression
+    | MINUS_MINUS expression                 # PreDecreaseExpression
+    | NOT expression                         # NotExpression
+    | expression (MULTIPLY | DIV | MODULUS) expression           # MultiplicativeExpression
+    | expression (PLUS | MINUS) expression                       # AdditiveExpression
+    | expression (LESS_THAN | GREATER_THAN | LESS_THAN_EQUALS | GREATER_THAN_EQUALS) expression # RelationalExpression
+    | expression (EQUALS | NOT_EQUALS | IDENTITY_EQUALS | IDENTITY_NOT_EQUALS | ASSING) expression # EqualityExpression
+    | expression AND expression              # LogicalAndExpression
+    | expression OR expression               # LogicalOrExpression
+    | expression QUESTION_MARK expression  COLON expression       # TernaryExpression
+    | value                                  # ValueExpression
+    | arrayDeclaration                       # ArrayExpression
+    | objectDeclaration                      # ObjectExpression
+    | htmlBody                                                       # HtmlBodyExpression
+    | return                                 # ReturnExpression
+    | breakStatement                         # BreakExpression
+    | parameter                   # ParameterAsExpression
+    | OPEN_PAREN expression CLOSE_PAREN      # ParenthesizedExpression
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// if - else
+
+ifStatement
+    : IF OPEN_PAREN expression CLOSE_PAREN statement elseIfStatement* elseStatement? SEMI_COLON?
+    ;
+
+elseIfStatement
+    : ELSE IF OPEN_PAREN expression CLOSE_PAREN block?
+    ;
+
+elseStatement
+    : ELSE block?
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// iteration
+
+iterationStatement
+    : DO statement WHILE OPEN_PAREN expression CLOSE_PAREN SEMI_COLON?         # DoStatement
+    | WHILE OPEN_PAREN expression CLOSE_PAREN statement                        # WhileStatement
+    | FOR OPEN_PAREN (expression | variableStatement)? SEMI_COLON expression? SEMI_COLON expression? CLOSE_PAREN statement # ForStatement
+    | FOR OPEN_PAREN (expression | variableStatement) IN expression CLOSE_PAREN statement # ForInStatement
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// switch
+
+switchStatement
+    : SWITCH OPEN_PAREN expression CLOSE_PAREN OPEN_BRACE caseClause* defaultClause? CLOSE_BRACE SEMI_COLON?
+    ;
+
+caseClause
+    : CASE expression COLON statement*
+    ;
+
+defaultClause
+    : DEFAULT_CASE COLON statement*
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// return & break
+
+breakStatement
+    : BREAK SEMI_COLON?
+    ;
+
+return
+    :RETURN OPEN_PAREN htmlBody CLOSE_PAREN SEMI_COLON       #ReturnHtmlBody
+    |RETURN expression SEMI_COLON?                          # ReturnExpressionOnly
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// functions
+
+functionCall
+    : IDENTIFIER OPEN_PAREN (expression (COMMA expression)*)? CLOSE_PAREN SEMI_COLON?
+    ;
+
+functionDeclartion
+    : normalFunction                        #Normal_Function
+    | anoymousFunction                      #Anoymous_Function
+    | arrowFunction                         #Arrow_Function
+    | decorator? accessModifier? FUNCTION? IDENTIFIER OPEN_PAREN expression* CLOSE_PAREN block   #Decorator_Function
+    ;
+
+normalFunction
+    : ASYNC? FUNCTION MULTIPLY? IDENTIFIER OPEN_PAREN (expression COMMA?)* CLOSE_PAREN(COLON type)? block
+    ;
+
+anoymousFunction
+    : ASYNC? FUNCTION MULTIPLY? OPEN_PAREN (expression COMMA?)* CLOSE_PAREN block
+    ;
+
+arrowFunction
+    : arrowParameters ARROW (block | expression)
+    ;
+
+arrowParameters
+    : value                               # ValueArrow
+    | OPEN_PAREN (expression COMMA?)* CLOSE_PAREN  # ExpressionArrow
+    ;
+
+////////////////////////////////////////////////////////////////////////////////
+// decorators
+
+decorator
+    : AT angularDecoratorName OPEN_PAREN  decoratorArguments  CLOSE_PAREN
+    ;
+
+decoratorArguments: OPEN_BRACE (decoratorArgument COMMA?)+ CLOSE_BRACE;
+
+decoratorArgument:
+ SELECTOR COLON STRING                                             #SelectorArgument
+|TEMPLATE_URL COLON STRING                                         #Template_UrlArgument
+|TEMPLATE COLON BACTICK htmlBody BACTICK                           #TemplateArgument
+;
+
+
+htmlBody : htmlBodyWithDiv                 #HtmlBodyWithDiv_L
+         | htmlBodyNestedDiv               #HtmlBodyNestedDiv_L
+         | htmlBodyDivAlone                #HtmlBodyDivAlone_L
+         | htmlBodyNoDiv                   #HtmlBodyNoDiv_L
+         ;
+
+// <div classname = "key">jsxContent</div>
+htmlBodyWithDiv: LESS_THAN (IDENTIFIER htmlAttributes*)? GREATER_THAN htmlContent LESS_THAN DIV IDENTIFIER? GREATER_THAN;
+
+// <div classname = "key" jsxContent/>
+htmlBodyNestedDiv : LESS_THAN IDENTIFIER htmlAttributes* htmlContent DIV GREATER_THAN
+                  ;
+// <div classname = "key"/> | <div/>
+htmlBodyDivAlone : LESS_THAN IDENTIFIER htmlAttributes* DIV GREATER_THAN
+                 ;
+// <sidebar>
+htmlBodyNoDiv : LESS_THAN IDENTIFIER htmlAttributes* GREATER_THAN
+              ;
+
+
+
+// HTML Content
+htmlContent : htmlBody  # HtmlContent_Element
+           | interpolation # HtmlContent_Interpolation
+           | IDENTIFIER # HtmlContent_ID
+           | htmlText? ((htmlBody | htmlExpression) htmlText?)*  #HtmlContents
            ;
 
-// Opening Tag
-openingTag : LESSTHAN ID jsxAttributes? GREATERTHAN # OpeningTagSt;
+htmlExpression:OPEN_BRACE expression* CLOSE_BRACE;
 
-// Closing Tag
-closingTag : LESSTHAN DIVISION ID GREATERTHAN # ClosingTagSt;
-
-// Self-Closing Tag
-selfClosingTag : LESSTHAN ID jsxAttributes? SLASHGREATERTHAN # SelfClosingTagSt;
-
-// Jsx Content
-jsxContent : jsxElement # JsxContent_Element
-           | interpolation # JsxContent_Interpolation
-           | ID # JsxContent_ID
-           ;
-
+htmlText: ~(LESS_THAN | OPEN_BRACE)+
+                 ;
 // Interpolation
-interpolation : DOUBLELEFTCURLY expression DOUBLERIGHTCURLY # InterpolationSt;
+interpolation :  DOUBLE_OPEN_BRACE expression DOUBLE_CLOSE_BRACE;
 
-// Jsx Attributes
-jsxAttributes : (angularDirective | jsxAttribute | jsxEvent | jsxBinding | jsxClass)+ # JsxAttributesSt;
+// HTML Attributes
+htmlAttributes : (angularDirective | htmlAttribute | htmlEvent | htmlBinding | htmlClass)+ COMMA? ;
 
 // Angular Directive
-angularDirective : STAR directive EQUAL STRING # AngularDirectiveSt;
+angularDirective : MULTIPLY directive ASSING STRING ;
 
-directive : NGIF # Directive_NgIf
-          | NGSWITCH # Directive_NgSwitch
-          | NGFOR # Directive_NgFor
-          | NGSTYLE # Directive_NgStyle
-          | NGCLASS # Directive_NgClass
+directive : NG_IF # Directive_NgIf
+          | NG_SWITCH # Directive_NgSwitch
+          | NG_FOR # Directive_NgFor
+          | NG_STYLE # Directive_NgStyle
+          | NG_CLASS # Directive_NgClass
           ;
 
-// Jsx Attribute
-jsxAttribute : ID EQUAL STRING # JsxAttributeSt;
+// HTML Attribute
+htmlAttribute :
+               IDENTIFIER ASSING objectDeclaration  #HtmlAtteibute_Object
+              | IDENTIFIER ASSING STRING             #HtmlAtteibute_String
+              | IDENTIFIER                           #HtmlAtteibute_Identifier
+              ;
 
-// Jsx Event
-jsxEvent : LEFTPAREN ID RIGHTPAREN EQUAL STRING # JsxEventSt;
+// HTML Event
+htmlEvent : OPEN_PAREN IDENTIFIER CLOSE_PAREN ASSING STRING ;
 
-// Jsx Binding
-jsxBinding : LEFTBRACKET ID RIGHTBRACKET EQUAL (STRING | interpolation) # JsxBindingSt;
+// HTML Binding
+htmlBinding : OPEN_BRACKET IDENTIFIER CLOSE_BRACKET ASSING (STRING | interpolation) ;
 
-// Jsx Class
-jsxClass : CLASS EQUAL STRING # JsxClassSt;
+// HTML Class
+htmlClass : CLASS ASSING STRING ;
 
-// Expression
-expression : ID # Expression_ID
-           | ID DOT ID # Expression_MemberAccess
-           | STRING # Expression_String
-           | INT # Expression_Int
-           | DOUBLE # Expression_Double
-           | BOOLEAN # Expression_Boolean
-           | value # Expression_Value
-           | callFunction # Expression_FunctionCall
-           | array # Expression_Array
-           | object # Expression_Object
-           | expression operation expression # Expression_Operation
-           ;
 
-// Types
-type : ID # Type_ID
-     | STRING # Type_String
-     | INT # Type_Int
-     | DOUBLE # Type_Double
-     | BOOLEAN # Type_Boolean
-     | ANY # Type_Any
-     | PUBLIC # Type_Public
-     | PRIVATE # Type_Private
-     | VOID # Type_Void
-     | NUMBER # Type_Number
-     | NULL # Type_Null
-     ;
+angularDecoratorName
+    : COMPONENT
+    | DIRECTIVE
+    | PIPE
+    | INJECTABLE
+    | INPUT
+    | OUTPUT
+    | HOST_LISTENER
+    | NG_MODULE
+    | VIEW_CHILD
+    | ON_INIT
+    ;
 
-// Print
-printStatement : CONSOLE DOT LOG LEFTPAREN expression RIGHTPAREN SEMI # PrintStatementSt;
+////////////////////////////////////////////////////////////////////////////////
+// helpers & values
+
+varHelpers
+    : VAR
+    | LET
+    ;
+
+value
+    : STRING
+    | NUMBER
+    | BOOLEAN
+    | NULL
+    | UNDEFINED
+    | IDENTIFIER
+    ;
+
+type
+    : STRING_TYPE
+    | NUMBER_TYPE
+    | BOOLEAN_TYPE
+    | ANY_TYPE
+    | VOID_TYPE
+    ;
+
+
