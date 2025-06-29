@@ -12,6 +12,7 @@ statement
     | variableStatement                   # VariableStatementSt
     | importStatement                     # ImportStatementSt
     | exportStatement                     # ExportStatementSt
+    | classDeclaration                    # ClassDeclarationSt
     | ifStatement                         # IfStatementSt
     | iterationStatement                  # IterationStatementSt
     | switchStatement                     # SwitchStatementSt
@@ -20,7 +21,8 @@ statement
     | expression SEMI_COLON?              # ExpressionSt
     ;
 
-block: OPEN_BRACE statement* CLOSE_BRACE SEMI_COLON?;
+block: OPEN_BRACE statement* CLOSE_BRACE SEMI_COLON?
+;
 
 printStatement
     : CONSOLE DOT LOG OPEN_PAREN (expression)? CLOSE_PAREN SEMI_COLON?
@@ -36,9 +38,10 @@ arrayAccess
 importStatement : IMPORT importDeclaration (FROM STRING)? SEMI_COLON?;
 
 importDeclaration
-    : importDefaultSpecifier
-    | importNamespaceSpecifier
-    | importNamedSpecifier;
+    :  importDefaultSpecifier         #ImportDefaultSpecifier_L
+    | importNamespaceSpecifier       #ImportNamespaceSpecifier_L
+    | importNamedSpecifier           #ImportNamedSpecifier_L
+    ;
 
 importDefaultSpecifier : IDENTIFIER | STRING;
 
@@ -57,9 +60,9 @@ importSpecifier
 // export
 
 exportStatement
-    : exportDefaultDeclaration
-    | exportDeclaration
-    | exportListDeclaration
+    :  exportDefaultDeclaration                      #ExportDefaultDeclaration_L
+    | exportDeclaration                              #ExportDeclaration_L
+    | exportListDeclaration                          #ExportListDeclaration_L
     ;
 
 exportDefaultDeclaration
@@ -170,7 +173,7 @@ objectProperty
     ;
 
 arrayDeclaration
-    : OPEN_BRACKET COMMA* (expression (COMMA expression)* COMMA?)? CLOSE_BRACKET
+    : OPEN_BRACKET COMMA* (expression COMMA)* expression? COMMA? CLOSE_BRACKET
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +202,6 @@ expression
     | htmlBody                                                       # HtmlBodyExpression
     | return                                 # ReturnExpression
     | breakStatement                         # BreakExpression
-    | parameter                   # ParameterAsExpression
     | OPEN_PAREN expression CLOSE_PAREN      # ParenthesizedExpression
     ;
 

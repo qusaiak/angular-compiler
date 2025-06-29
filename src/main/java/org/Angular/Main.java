@@ -1,8 +1,6 @@
 package org.Angular;
 
-import AST.Program;
 import ErrorHandling.SemanticCheck;
-import Visitor.BaseVisitor;
 import SymbolTable.SymbolTable;
 import SymbolTable.SymbolTable2;
 
@@ -11,7 +9,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.antlr.v4.runtime.CharStreams.fromFileName;
 
